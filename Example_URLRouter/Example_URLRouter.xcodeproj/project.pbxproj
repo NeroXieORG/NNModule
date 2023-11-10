@@ -3,12 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		61BFF47731F3AA53D7A3675E /* Pods_Example_URLRouter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E4D347422563F43DCDBAD69 /* Pods_Example_URLRouter.framework */; };
-		AE78A63927B77862001323A8 /* RouteUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE78A63827B77862001323A8 /* RouteUtils.swift */; };
+		AE261AEB2AF8DDCB00FBAF18 /* HTMLModuleImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE261AEA2AF8DDCB00FBAF18 /* HTMLModuleImpl.swift */; };
+		AE261AED2AF8DEF800FBAF18 /* AModuleImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE261AEC2AF8DEF800FBAF18 /* AModuleImpl.swift */; };
+		AE261AEF2AF8F21D00FBAF18 /* BModuleImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE261AEE2AF8F21D00FBAF18 /* BModuleImpl.swift */; };
 		AEE7B7EA26C94660004AFE9F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7B7E926C94660004AFE9F /* AppDelegate.swift */; };
 		AEE7B7EE26C94660004AFE9F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7B7ED26C94660004AFE9F /* ViewController.swift */; };
 		AEE7B7F126C94660004AFE9F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AEE7B7EF26C94660004AFE9F /* Main.storyboard */; };
@@ -38,7 +40,9 @@
 /* Begin PBXFileReference section */
 		31B3C0B6C47D4FBDA6B5D231 /* Pods-Example_URLRouter.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example_URLRouter.release.xcconfig"; path = "Target Support Files/Pods-Example_URLRouter/Pods-Example_URLRouter.release.xcconfig"; sourceTree = "<group>"; };
 		6E4D347422563F43DCDBAD69 /* Pods_Example_URLRouter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example_URLRouter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		AE78A63827B77862001323A8 /* RouteUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteUtils.swift; sourceTree = "<group>"; };
+		AE261AEA2AF8DDCB00FBAF18 /* HTMLModuleImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLModuleImpl.swift; sourceTree = "<group>"; };
+		AE261AEC2AF8DEF800FBAF18 /* AModuleImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AModuleImpl.swift; sourceTree = "<group>"; };
+		AE261AEE2AF8F21D00FBAF18 /* BModuleImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BModuleImpl.swift; sourceTree = "<group>"; };
 		AEE7B7E626C94660004AFE9F /* Example_URLRouter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example_URLRouter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AEE7B7E926C94660004AFE9F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AEE7B7ED26C94660004AFE9F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -102,7 +106,6 @@
 			isa = PBXGroup;
 			children = (
 				AEE7B7E826C94660004AFE9F /* Example_URLRouter */,
-				AEE7B7FF26C94662004AFE9F /* Example_URLRouterTests */,
 				AEE7B80A26C94662004AFE9F /* Example_URLRouterUITests */,
 				AEE7B7E726C94660004AFE9F /* Products */,
 				81C1A1A5B8074ACE612DFC04 /* Pods */,
@@ -125,11 +128,14 @@
 			children = (
 				AEE7B7E926C94660004AFE9F /* AppDelegate.swift */,
 				AEE7B7ED26C94660004AFE9F /* ViewController.swift */,
-				AE78A63827B77862001323A8 /* RouteUtils.swift */,
+				AE261AEA2AF8DDCB00FBAF18 /* HTMLModuleImpl.swift */,
+				AE261AEC2AF8DEF800FBAF18 /* AModuleImpl.swift */,
+				AE261AEE2AF8F21D00FBAF18 /* BModuleImpl.swift */,
 				AEE7B7EF26C94660004AFE9F /* Main.storyboard */,
 				AEE7B7F226C94661004AFE9F /* Assets.xcassets */,
 				AEE7B7F426C94661004AFE9F /* LaunchScreen.storyboard */,
 				AEE7B7F726C94661004AFE9F /* Info.plist */,
+				AEE7B7FF26C94662004AFE9F /* Example_URLRouterTests */,
 			);
 			path = Example_URLRouter;
 			sourceTree = "<group>";
@@ -326,8 +332,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AE261AEF2AF8F21D00FBAF18 /* BModuleImpl.swift in Sources */,
 				AEE7B7EE26C94660004AFE9F /* ViewController.swift in Sources */,
-				AE78A63927B77862001323A8 /* RouteUtils.swift in Sources */,
+				AE261AED2AF8DEF800FBAF18 /* AModuleImpl.swift in Sources */,
+				AE261AEB2AF8DDCB00FBAF18 /* HTMLModuleImpl.swift in Sources */,
 				AEE7B7EA26C94660004AFE9F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -31,10 +31,7 @@ import UIKit
         loadAllMethods(from: Module.RegisterService.self)
     }
     
-    public func application(
-        _ application: UIApplication,
-        willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?
-    ) -> Bool {
+    public func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> Bool {
         // load application service early
         let applicationImpl = Module.applicationService
         applicationImpl.applicationWillAwake()
@@ -46,12 +43,15 @@ import UIKit
         return applicationImpl.application?(application, willFinishLaunchingWithOptions: launchOptions) ?? true
     }
     
-    public func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         loadWindowIfNeed()
-        return Module.applicationService.application(application, didFinishLaunchingWithOptions: launchOptions)
+        
+        let result = Module.applicationService.application?(application, didFinishLaunchingWithOptions: launchOptions) ?? true
+#if DEBUG
+        print("application did finish launching")
+        Module.serviceInfoPrettyPrinted()
+#endif
+        return result
     }
 }
 

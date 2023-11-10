@@ -147,12 +147,11 @@ final class ModuleServiceCenter {
             "serviceTypeMap": Dictionary(uniqueKeysWithValues: serviceTypeMap.map { ("\($0)", "\($1)") }) ,
             "implInstanceMap": Dictionary(uniqueKeysWithValues: implInstanceMap.map { ("\($0)", "\($1)") })
         ]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: map, options: .prettyPrinted) else {
-            return
-        }
         
-        let jsonString = String(data: jsonData, encoding: .utf8) ?? ""
-        print(jsonString)
+        if let data = try? JSONSerialization.data(withJSONObject: map, options: .prettyPrinted),
+           let jsonString = String(data: data, encoding: .utf8) {
+            print("service info = \(jsonString)")
+        }
 #endif
     }
 }

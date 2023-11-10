@@ -21,6 +21,7 @@ import Foundation
 @objc public protocol URLRouteInterceptionAction: NSObjectProtocol {
     
     /// Specified routes.
+    ///
     /// It will match all routes if the value is nil or an empty array.
     var specifiedRoutes: [URLRouteName]? { get }
     
@@ -33,11 +34,11 @@ import Foundation
 
 @objcMembers public class URLRouteInterceptor: NSObject {
     
-    private var routeFullPathsMap: [ObjectIdentifier: [RouteURLFullPath]] = [:]
+    private var actionMatchedRoutesMap: [ObjectIdentifier: [String]] = [:]
     
     public private(set) var actions: [URLRouteInterceptionAction] = []
     
-    private var routeParser: URLRouteParserType
+    private weak var routeParser: URLRouteParserType? = nil
     
     @objc(initWithRouteParser:)
     public init(with routeParser: URLRouteParserType = URLRouteParser()) {
@@ -52,7 +53,8 @@ import Foundation
     public func insert(_ action: URLRouteInterceptionAction, at i: Int) {
         if actions.contains(where: { $0 === action }) { return }
         
-        if updateRouteFullPaths(by: action) { actions.insert(action, at: i) }
+        configMatchedRoutes(with: action)
+        actions.insert(action, at: i)
     }
     
     @objc(appendAction:)
@@ -61,53 +63,49 @@ import Foundation
     public func append(_ action: URLRouteInterceptionAction) {
         if actions.contains(where: { $0 === action }) { return }
         
-        if updateRouteFullPaths(by: action) { actions.append(action) }
+        configMatchedRoutes(with: action)
+        actions.append(action)
     }
     
     /// Removes the specified action from actions.
     /// - Parameter action: The action to remove from actions.
     public func remove(_ action: URLRouteInterceptionAction) {
         actions.removeAll { $0 === action }
-        routeFullPathsMap.removeValue(forKey: ObjectIdentifier(action))
+        actionMatchedRoutesMap.removeValue(forKey: ObjectIdentifier(action))
     }
     
     /// The result of intercepting a route.
     /// - Parameter routeUrl: A data used to describe a route.
     /// - Returns: The result of interception.
     public func interceptSuccessfully(for routeUrl: RouteURL) -> Bool {
-        for action in matchedActions(for: routeUrl) {
+        let matchedActions = actions.filter { action in
+            let routes = actionMatchedRoutesMap[ObjectIdentifier(action)] ?? []
+            if routes.isEmpty { return true }
+            
+            return routes.contains { $0 == routeUrl.fullPath || $0 == routeUrl.combinedRoute }
+        }
+            
+        for action in matchedActions {
             switch action.interceptRoute(for: routeUrl) {
-            case .next: break
             case .reject: return true
+            case .next: continue
             }
         }
         
         return false
     }
     
-    private func updateRouteFullPaths(by action: URLRouteInterceptionAction) -> Bool {
-        var fullPaths: [String] = []
+    private func configMatchedRoutes(with action: URLRouteInterceptionAction) {
+        var matchedRoutes: [URLRouteName] = []
         for route in action.specifiedRoutes ?? [] {
-            guard let routeUrl = self.routeParser.routeUrl(from: route) else {
-                URLRouterLog("action (\(action)) provided an invalid route (\(route))")
-                return false
+            guard let routeUrl = routeParser?.routeUrl(from: route) else {
+                continue
             }
             
-            fullPaths.append(routeUrl.fullPath)
+            matchedRoutes.append(routeUrl.fullPath)
         }
         
-        if !fullPaths.isEmpty { routeFullPathsMap[ObjectIdentifier(action)] = fullPaths }
-        
-        return true
-    }
-    
-    private func matchedActions(for routeUrl: RouteURL) -> [URLRouteInterceptionAction] {
-        actions.filter { action in
-            if action.specifiedRoutes?.isEmpty ?? true { return true }
-            
-            let routePaths = self.routeFullPathsMap[ObjectIdentifier(action)]!
-            return routePaths.contains { $0.matched(with: routeUrl) }
-        }
+        actionMatchedRoutesMap[ObjectIdentifier(action)] = matchedRoutes
     }
 }
 
@@ -128,21 +126,12 @@ extension URLRouteInterceptor {
             self.interceptionHandler = handler
         }
         
-        public convenience init(specifiedRoute: String, handler: @escaping Handler) {
+        public convenience init(specifiedRoute: URLRouteName, handler: @escaping Handler) {
             self.init(specifiedRoutes: [specifiedRoute], handler: handler)
         }
         
         public func interceptRoute(for routeUrl: RouteURL) -> URLRouteInterceptionResult {
             interceptionHandler(routeUrl)
         }
-    }
-}
-
-fileprivate typealias RouteURLFullPath = String
-
-fileprivate extension RouteURLFullPath {
-    
-    func matched(with routeUrl: RouteURL) -> Bool {
-        self == routeUrl.fullPath || self == routeUrl.combinedRoute
     }
 }

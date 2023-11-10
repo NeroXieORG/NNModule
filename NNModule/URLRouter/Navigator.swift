@@ -25,7 +25,13 @@ import UIKit
     ///   - from: The current view controller.
     ///   - animated: Pass true to animate the presentation.
     ///   - completion: The block to execute after the presentation finishes.
-    func present(_ viewController: UIViewController, wrap: UINavigationController.Type?, from: UIViewController?, animated: Bool, completion: (() -> Void)?)
+    func present(
+        _ viewController: UIViewController,
+        wrap: UINavigationController.Type?,
+        from: UIViewController?,
+        animated: Bool,
+        completion: (() -> Void)?
+    )
 }
 
 public extension NavigatorType {

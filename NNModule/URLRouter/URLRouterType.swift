@@ -19,18 +19,23 @@ public typealias HandleRouteFactory = (_ routeUrl: RouteURL, _ navigator: Naviga
     /// A navigator push or present view controller.
     var navigator: NavigatorType { get }
     
-    /// Registers a route with a route handler.
-    /// - Parameters:
-    ///   - route: The route name
-    ///   - handleRouteFactory: The route handler to call when the route is matched.
-    func delayedRegisterRoute(_ route: URLRouteName, handleRouteFactory: @escaping HandleRouteFactory)
+//    @available(*, deprecated, message: "This method has been deprecated!")
+//    /// Registers a route with a route handler.
+//    /// - Parameters:
+//    ///   - route: The route name
+//    ///   - handleRouteFactory: The route handler to call when the route is matched.
+//    func delayedRegisterRoute(_ route: URLRouteName, handleRouteFactory: @escaping HandleRouteFactory)
     
     /// Registers a route with a route handler.
     /// - Parameters:
     ///   - route: The route name.
     ///   - handleRouteFactory: The route handler to call when the route is matched.
     func registerRoute(_ route: URLRouteName, handleRouteFactory: @escaping HandleRouteFactory)
-
+    
+    /// Adds a route module.
+    /// - Parameter routeModule: The instance conforms `URLRouteModuleType`.
+    func addRouteModule(_ routeModule: URLRouteModuleType)
+    
     /// Remove a route.
     /// - Parameter route: The route name.
     func removeRoute(_ route: URLRouteName)
@@ -55,30 +60,29 @@ extension URLRouterType {
     }
 }
 
-// MARK: - URLNestingRouterType
-
-/// A protocol to support route nesting.
-@objc public protocol URLNestingRouterType: URLRouterType {
-    
-    /// Upper-level router of the current router.
-    weak var upperRouter: URLNestingRouterType? { get }
-    
-    /// Registers an URL with a subRouter.
-    /// - Parameters:
-    ///   - route: The route name.
-    ///   - subRouter: A subrouter which can handle the route.
-    func registerRoute(_ route: URLRouteName, used subRouter: URLNestingRouterType)
-}
-
-public extension URLNestingRouterType {
-    
-    func registerRoutes(_ routes: [URLRouteName], used subRouter: URLNestingRouterType) {
-        routes.forEach { registerRoute($0, used: subRouter) }
-    }
-}
-
+//// MARK: - URLNestingRouterType
+//@available(*, deprecated, renamed: "URLModularRouterType", message: "This interface has been deprecated!")
+///// A protocol to support route nesting.
+//@objc public protocol URLNestingRouterType: URLRouterType {
+//    
+//    /// Upper-level router of the current router.
+//    weak var upperRouter: URLNestingRouterType? { get }
+//    
+//    /// Registers an URL with a subRouter.
+//    /// - Parameters:
+//    ///   - route: The route name.
+//    ///   - subRouter: A subrouter which can handle the route.
+//    func registerRoute(_ route: URLRouteName, used subRouter: URLNestingRouterType)
+//}
+//
+//public extension URLNestingRouterType {
+//    
+//    func registerRoutes(_ routes: [URLRouteName], used subRouter: URLNestingRouterType) {
+//        routes.forEach { registerRoute($0, used: subRouter) }
+//    }
+//}
+//
 // MARK: - URLRouterTypeAttach
-
 @objc public protocol URLRouterTypeAttach: NSObjectProtocol {
     
     /// A redirector for redirecting routes.
@@ -87,4 +91,7 @@ public extension URLNestingRouterType {
     /// A route interceptor that decides whether to execute the route.
     var routeInterceptor: URLRouteInterceptor { get }
 }
+
+
+
 

@@ -35,9 +35,9 @@
    return self.parser.defaultScheme;
 }
 
-- (NSURL *)urlFromRoute:(NSString *)route {
-    return [self.parser urlFromRoute:route];
-}
+//- (NSURL *)urlFromRoute:(NSString *)route {
+//    return [self.parser urlFromRoute:route];
+//}
 
 - (RouteURL *)routeUrlFromRoute:(NSString *)route params:(NSDictionary<NSString *,id> *)params {
     return [self.parser routeUrlFromRoute:route params:params];

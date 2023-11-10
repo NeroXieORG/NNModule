@@ -13,7 +13,7 @@ public typealias RouteRedirectData = (route: URLRouteName, params: [String: Any]
     
     private var routeMap: [URLRouteName: String] = [:]
     
-    private var routeParser: URLRouteParserType
+    private weak var routeParser: URLRouteParserType? = nil
     
     @objc(initWithRouteParser:)
     public init(with routeParser: URLRouteParserType) {
@@ -23,17 +23,22 @@ public typealias RouteRedirectData = (route: URLRouteName, params: [String: Any]
     /// Updates redirect route map.
     /// - Parameter routeMap: A redirect route map
     public func updateRedirectRoutes(_ routeMap: [String: String]) {
-        var map: [URLRouteName: String] = [:]
-        routeMap.forEach { if let key = routeParser.routeUrl(from: $0)?.fullPath { map[key] = $1 } }
-        self.routeMap = self.routeMap.merging(map) { _, second in second }
+        guard let routeParser = self.routeParser else {
+            return
+        }
+        
+        var result: [URLRouteName: String] = [:]
+        routeMap.forEach { if let key = routeParser.routeUrl(from: $0)?.fullPath { result[key] = $1 } }
+        self.routeMap = self.routeMap.merging(result) { _, second in second }
     }
     
     /// Resets redirect route map.
     /// - Parameter routeMap: A redirect route map
     public func resetRedirectRoutes(_ routeMap: [String: String]) {
-        var map: [String: String] = [:]
-        routeMap.forEach { if let key = routeParser.routeUrl(from: $0)?.fullPath {  map[key] = $1 } }
-        self.routeMap = map
+        guard let _ = self.routeParser else { return }
+        
+        self.routeMap.removeAll()
+        updateRedirectRoutes(routeMap)
     }
     
     /// Gets the redirection data of the route.

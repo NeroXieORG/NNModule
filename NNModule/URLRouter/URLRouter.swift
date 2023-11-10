@@ -7,68 +7,45 @@
 
 import Foundation
 
-@objcMembers public class URLRouter: NSObject, URLNestingRouterType, URLRouterTypeAttach {
-
+@objcMembers public class URLRouter: NSObject, URLRouterType, URLRouterTypeAttach {
+ 
     // The default route to handle the URL has http or https.
-    public static var webLink: URLRouteName { "weblink" }
+    public static var webLink: URLRouteName { "://weblink" }
     
-    private var _routeParser: URLRouteParserType = URLRouteParser()
+    public private(set) var routeParser: URLRouteParserType = URLRouteParser()
     
-    private var _navigator: NavigatorType = Navigator()
+    public private(set) var navigator: NavigatorType = Navigator()
     
-    private var _routeRedirector: URLRouteRedirector
+    public private(set) var routeRedirector: URLRouteRedirector
     
-    private var _routeInterceptor: URLRouteInterceptor
+    public private(set) var routeInterceptor: URLRouteInterceptor
     
-    private var delayedHandlers = [(URLRouterType) -> Void]()
+    private var routeModulesMap = [String: URLRouteModuleType]()
     
     private var handleRouteFactories = [String: HandleRouteFactory]()
-    
-    public private(set) weak var upperRouter: URLNestingRouterType? = nil
-    
-    public var routeParser: URLRouteParserType { upperRouter?.routeParser ?? _routeParser }
-    
-    public var navigator: NavigatorType { upperRouter?.navigator ?? _navigator }
-    
-    public var routeRedirector: URLRouteRedirector {
-        (upperRouter as? URLRouterTypeAttach)?.routeRedirector ?? _routeRedirector
-    }
-    
-    public var routeInterceptor: URLRouteInterceptor {
-        (upperRouter as? URLRouterTypeAttach)?.routeInterceptor ?? _routeInterceptor
-    }
-    
+        
     @objc(defaultRouter)
-    public static var `default` = URLRouter()
+    public static var `default`: URLRouterType = URLRouter()
+    
+    // MARK: - Init Method
     
     public required override init() {
-        _routeRedirector = URLRouteRedirector(with: _routeParser)
-        _routeInterceptor = URLRouteInterceptor(with: _routeParser)
+        routeRedirector = URLRouteRedirector(with: routeParser)
+        routeInterceptor = URLRouteInterceptor(with: routeParser)
         
         super.init()
     }
     
     public required init(routeParser: URLRouteParserType = URLRouteParser(), navigator: NavigatorType = Navigator()) {
-        _routeParser = routeParser
-        _navigator = navigator
-        _routeRedirector = URLRouteRedirector(with: routeParser)
-        _routeInterceptor = URLRouteInterceptor(with: routeParser)
+        self.routeParser = routeParser
+        self.navigator = navigator
+        routeRedirector = URLRouteRedirector(with: routeParser)
+        routeInterceptor = URLRouteInterceptor(with: routeParser)
         
         super.init()
     }
     
-    @objc(initWithRouter:)
-    public convenience init(with router: URLNestingRouterType) {
-        self.init(routeParser: router.routeParser, navigator: router.navigator)
-        
-        upperRouter = router
-        if let interceptor = (router as? URLRouterTypeAttach)?.routeInterceptor { _routeInterceptor = interceptor }
-        if let redirector = (router as? URLRouterTypeAttach)?.routeRedirector { _routeRedirector = redirector }
-    }
-    
-    public func delayedRegisterRoute(_ route: URLRouteName, handleRouteFactory: @escaping HandleRouteFactory) {
-        delayedHandlers.append { $0.registerRoute(route, handleRouteFactory: handleRouteFactory) }
-    }
+    // MARK: - URLRouterType
     
     public func registerRoute(_ route: URLRouteName, handleRouteFactory: @escaping HandleRouteFactory) {
         guard let routeUrl = routeParser.routeUrl(from: route) else {
@@ -84,23 +61,7 @@ import Foundation
         
         handleRouteFactories[key] = handleRouteFactory
     }
-    
-    public func registerRoute(_ route: URLRouteName, used subRouter: URLNestingRouterType) {
-        guard let upperRouter = subRouter.upperRouter, upperRouter === self else {
-            URLRouterLog("upper router for (\(subRouter)) is not \(self)")
-            return
-        }
         
-        guard let routeUrl = routeParser.routeUrl(from: route) else {
-            URLRouterLog("route for (\(route)) is invalid")
-            return
-        }
-        
-        registerRoute(routeUrl.combinedRoute) { routeUrl, _ in
-            subRouter.openRoute(routeUrl.fullPath, parameters: routeUrl.parameters)
-        }
-    }
-    
     public func removeRoute(_ route: URLRouteName) {
         guard let routeUrl = routeParser.routeUrl(from: route) else {
             URLRouterLog("route for (\(route)) is invalid")
@@ -109,19 +70,23 @@ import Foundation
         
         let key = routeUrl.fullPath
         handleRouteFactories.removeValue(forKey: key)
+//        routeModulesMap.removeValue(forKey: key)
     }
     
     public func removeAllRoutes() {
         handleRouteFactories = [:]
+//        routeModulesMap = [:]
     }
     
     @discardableResult
     public func openRoute(_ route: URLRouteName, parameters: [String: Any]) -> Bool {
-        loadDelayedHandlerIfNeed()
         guard let routeUrl = routeParser.routeUrl(from: route, params: parameters) else {
             URLRouterLog("route for (\(route)) is invalid")
             return false
         }
+        
+        // Load delayed routes
+        loadDelayedRoutes(from: routeUrl)
         
         // Check if is a redirected route
         if let redirectData = routeRedirector.routeRedirectData(from: routeUrl) {
@@ -139,34 +104,60 @@ import Foundation
                 return invokeRouteHandler(webLinkHandler, routeUrl: routeUrl)
             }
             
-            guard let upperRouter = self.upperRouter else {
-                URLRouterLog("route for (\(route)) is web link, please register handler for web links")
-                return false
-            }
-            
-            return upperRouter.openRoute(route, parameters: parameters)
+            URLRouterLog("route for (\(route)) is web link, please register handler for web links")
+            return false
         }
         
         if let handler = findRouteHandler(with: routeUrl) {
             return invokeRouteHandler(handler, routeUrl: routeUrl)
         }
         
-        // If the current router cannot handle the route, it will be handled by the super router.
-        guard let upperRouter = self.upperRouter else {
-            URLRouterLog("route for (\(route)) is not exist")
-            return false
-        }
-        
-        return upperRouter.openRoute(route, parameters: parameters)
+        URLRouterLog("route for (\(route)) is not exist")
+        return false
     }
     
-    private func loadDelayedHandlerIfNeed() {
-        delayedHandlers.forEach { handler in handler(self) }
-        delayedHandlers = []
+    public func addRouteModule(_ routeModule: URLRouteModuleType) {
+        var delayedLoadingRoutes = Set<String>()
+        for route in routeModule.delayedLoadingRoutes ?? [] {
+            guard let routeUrl = routeParser.routeUrl(from: route) else {
+                URLRouterLog("route for (\(route)) is invalid")
+                continue
+            }
+            
+            delayedLoadingRoutes.insert(routeUrl.combinedRoute)
+        }
+        
+        if (delayedLoadingRoutes.isEmpty) {
+            routeModule.configRoutes(with: self)
+            return
+        }
+        
+        for route in delayedLoadingRoutes {
+            if let oldRouteModule = routeModulesMap[route] {
+                URLRouterLog("Delayed loading route (\(route)) from \(routeModule) has been registered in \(oldRouteModule)")
+                continue
+            }
+            
+            routeModulesMap[route] = routeModule;
+        }
+    }
+
+    // MARK: - Private Method
+    
+    private func loadDelayedRoutes(from routeUrl: RouteURL) {
+        var tmp = routeModulesMap[routeUrl.combinedRoute]
+        if (tmp == nil && routeUrl.isWebLink) { tmp = routeModulesMap[URLRouter.webLink] }
+
+        guard let routeModule = tmp else { return }
+        
+        routeModule.configRoutes(with: self)
+        routeModulesMap = routeModulesMap.filter { (_, value) in value !== routeModule }
     }
     
     private func findRouteHandler(with routeUrl: RouteURL) -> HandleRouteFactory? {
-        if let handler = handleRouteFactories[routeUrl.fullPath]  { return handler }
+        if let handler = handleRouteFactories[routeUrl.fullPath]  { 
+            return handler
+        }
         
         if !routeUrl.path.isEmpty,
            let combinedRouteUrl = routeParser.routeUrl(from: routeUrl.combinedRoute),
@@ -184,9 +175,13 @@ import Foundation
     }
 }
 
+//fileprivate func RouteModuleKey(_ routeUrl: RouteURL) -> String { routeUrl.combinedRoute }
+//
+//fileprivate func RouteHandlerKey(_ routeUrl: RouteURL) -> String { routeUrl.fullPath }
+
 public func URLRouterLog<T>(_ message: T) {
 #if DEBUG
-    print("URLRouter Error ⚠️ :\(message)")
+    print("⚠️ URLRouter Error: \(message)")
 #endif
 }
 

@@ -1,14 +1,17 @@
 # URLRouter
 
+更新于2020-12-13【v1.0.7 简化 URLRouter 结构，使用路由模块化的方式实现按需注册路由，替换原有的路由延时注册、router 嵌套】
+
 ## 简介
 
 URLRouter 是一个基于对 URL 的解析，简单、方便、轻量的路由跳转方式。提供的功能如下：
 + 路由注册与跳转
-+ 路由延时注册
 + 路由拦截
 + 路由重定向
-+ router 嵌套
++ 路由模块化（实现按需注册路由）
 + 兼容 OC
++ ~~路由延时注册~~
++ ~~router 嵌套~~ 
 
 ## 使用
 
@@ -17,7 +20,8 @@ URLRouter 是一个基于对 URL 的解析，简单、方便、轻量的路由�
 在使用前先介绍下 URLRouter 中的相关概念：
 
 + `URLRouterType`: 定义 router 的接口，`URLRouter` 为默认实现
-+ `URLNestingRouterType`: 定义 router 嵌套的接口，`URLRouter` 为默认实现
++ `URLRouteModuleType`: 定义路由模块化的接口
++ ~~`URLNestingRouterType`: 定义 router 嵌套的接口，`URLRouter` 为默认实现~~
 + `URLRouterTypeAttach`: 定义了 router 的其他拓展功能的接口， `URLRouter` 为默认实现
 + `URLRouteParserType`: 定义 URL 解析的接口，`URLRouteParser` 为默认实现
 + `NavigatorType`: 定义导航的接口，`Navigator` 为默认实现
@@ -48,15 +52,19 @@ let router = URLRouter.default
 
 // 注册单条路由
 router.registerRoute("module/apage") { routeUrl, navigator in
-    print(routeUrl.parameters)
     navigator.push(AViewController(), animated: true)
     
     return true
 }
 
-// 注册聚合路由
+router.registerRoute("module/bpage") { routeUrl, navigator in
+    navigator.push(BViewController(), animated: true)
+    
+    return true
+}
+
+// 使用聚合路由注册替换上面的单条路由注册
 router.registerRoute("module") { routeUrl, navigator in
-    print(routeUrl.parameters)
     switch routeUrl.path {
     case "/apage":
         navigator.push(AViewController(), animated: true)
@@ -70,36 +78,34 @@ router.registerRoute("module") { routeUrl, navigator in
 }
 ```
 
-路由跳转的多种写法：
+路由跳转支持多种写法：
 
 ```swift
-router.openRoute("nn://module/apage?id=111&name=nero")
+router.openRoute("module/apage", parameters: ["id": 111, "name": "nero"])
+// or
+router.openRoute("://module/apage", parameters: ["id": 111, "name": "nero"])
+// or
+router.openRoute("nn://module/apage", parameters: ["id": 111, "name": "nero"])
 // or
 router.openRoute("://module/apage?id=111&name=nero")
 // or
-router.openRoute("module/apage", parameters: ["id": 111, "name": "nero"])
+router.openRoute("nn://module/apage?id=111&name=nero")
+// or
+router.openRoute("module/apage?<id>&<name>", parameters: ["id": 111, "name": "nero"])
 ```
+
+上述写法均等同于 `router.openRoute("nn://module/apage?id=111&name=nero")`
 
 注意事项：
 
-+ 传入的路由需要符合 URL 的规范，可以是 String 类型也可以是 URL 类型
++ 传入的路由需要符合 URL 的规范
 + 可以省略对默认的 scheme 声明，scheme 和 host 不区分大小写，path 区分大小写
-+ 若有单条路由的 handler 则会优先匹配，否则就会匹配聚合路由的 handler，URLRouter 使用 `scheme://host` 做为聚合路由
-+ 聚合路由可以减少 router 中的路由表大小，在定义路由时处于同一业务模块的路由建议使用同一个 host
-+ 跳转路由时传递传递对象类型的数据
-+ 跳转路由时，parameters 和 URL 的 query存在相同键时，使用 parameters 中的值
-
-### 路由延时注册
-
-URLRouter 支持路由的延时注册，在跳转路由时会先注册所有延时注册的路由。
-
-```swift
-let router = URLRouter.default
-router.delayedRegisterRoute("module/apage") { routeUrl, navigator in
-    navigator.push(AViewController(), animated: true)
-    return true
-}
-```
++ 若有单条路由的 handler 则会优先匹配，否则就会尝试匹配聚合路由的 handler，URLRouter 使用 `scheme://host` 做为聚合路由
++ 定义路由时处于同一业务模块的路由建议使用同一个 host，根据 path 的不同来区分 handler ，使用聚合路由注册可以减少整体路由表的大小
++ 注册路由时无需考虑 parameters，跳转路由时需要考虑 parameters
++ 跳转路由时支持 parameters 传递对象类型的数据
++ 跳转路由时，parameters 和 URL 的 query 存在相同键时，使用 parameters 中的值
++ 1.0.7 新增路由 parameters `<key>` 适配符写法。当跳转路由为非原生链接（如 http 链接，第三方链接等），且 parameters 是混合参数的情况下，可以使用 `<key>` 适配符写法从混合参数中提取所需的键值对来组装出一条正确的 URL 
 
 ### 路由重定向
 
@@ -150,9 +156,11 @@ public protocol URLRouteInterceptionAction: AnyObject {
 let action = URLRouteInterceptor.Action(specifiedRoutes: ["module"]) {
     // 定义拦截规则
 }
-// 添加拦截 Action
+// 添加拦截 action
+// 该 action 会匹配 scheme 为 default scheme 且 host 为 `module` 的所有路由。
 URLRouter.default.routeInterceptor.append(action)
 ```
+
 使用自定义拦截 Action：
 
 ```swift
@@ -168,11 +176,11 @@ class PermissionAction: URLRouteInterceptionAction {
             return .reject
         }
         
-        var parameters = routeUrl.parameters
-        if parameters["permission"] == nil {
-            parameters["permission"] = 1
-            // 重置路由参数
-            return .reset(parameters: parameters)
+        var params = routeUrl.parameters
+        if params["permission"] == nil {
+            params["permission"] = 1
+            // 更新路由参数
+            routeUrl.resetParameters(params)
         }
         
         return .next
@@ -180,55 +188,61 @@ class PermissionAction: URLRouteInterceptionAction {
 }
 
 // 插入拦截 Action
+// 该 action 会匹配 scheme 为 default scheme 且 host 为 `module` 的所有路由。
 URLRouter.default.routeInterceptor.insert(PermissionAction(), at: 0)
 ```
 
-### router 嵌套
+### 路由模块化
 
-URLRouter 中的 router 可以分成全局 router（根 router ）和模块内 router（子 router ）。在组件化开发的场景下，开发者可以为每个业务模块单独创建一个 router 并与全局 router 进行嵌套，模块中的路由跳转（包括外部路由）均使用该 router。
+URLRouter 在设计结构的时候一直都把优化路由表大小当做一个特点，使用了聚合路由、路由懒加载、路由嵌套来优化，但是这一设计过于繁琐，因此在 1.0.7 版本中使用路由模块化实现按需注册路由的方式来替换路由懒加载、路由嵌套并简化 API 的调用。
 
-在进行 router 嵌套后，根 router 下的所有子 router 均使用根 router 的 URL 解析器、导航、重定向器以及拦截器进行路由的解析与跳转。另外使用 router 嵌套结合子 router 延时注册路由的方式可以真正做到按模块加载路由的效果。
-
-使用子 router：
+`URLRouteModuleType` 的相关定义：
 
 ```swift
-// 1. 创建子 router
-
-// 根 router
-let router = URLRouter.default
-// 通过根 router 创建A模块子 router
-let subRouterA = URLRouter(with: router)
-subRouterA.registerRoute("amodule/main") { routeUrl, navigator in
-    navigator.push(AViewController())
-    return true
-}
-// 通过根 router 创建B模块子 router 
-let subRouterB = URLRouter(with: router)
-subRouter2.registerRoute("bmodule/main") { routeUrl, navigator in
-    navigator.present(BViewController())
-    return true
+// 1.0.7 新增
+@objc public protocol URLRouteModuleType: NSObjectProtocol {
+    
+    @objc optional var delayedLoadingRoutes: [URLRouteName] { get }
+    
+    func configRoutes(with router: URLRouterType)
 }
 
-// 2.根 router 添加子 router 所处理的路由条目
-
-// host 为 amodule 的路由都会由 subRouterA 处理
-router.registerRoute("amodule", used: subRouterA)
-// host 为 bmodule 的路由都会由 subRouterB 处理
-router.registerRoute("bmodule", used: subRouterB)
-
-// 3. 使用子 router 跳转
-
-// A模块页面中跳转B模块页面
-subRouterA.openRoute("bmodule/main?id=123")
-// or
-router.openRoute("bmodule/main?id=123")
+@objc public protocol URLRouterType: NSObjectProtocol {
+    // 1.0.7 新增
+    func addRouteModule(_ routeModule: URLRouteModuleType)
+}
 ```
+
+每一个 route module 代表一个业务模块，使用 `addRouteModule(_ routeModule:)` 函数添加 route module。当 router 添加 route module 时，如果当前 route module 的 `delayedLoadingRoutes` 未实现或者返回一个空数组，意味着该模块的路由不需要按需注册，会立即调用 `configRoutes(with router:)` 函数，否则，`configRoutes(with router:)` 函数会等到使用 `openRoute(_ route:, parameters:)` 跳转 `delayedLoadingRoutes` 中包含的路由时才被调用。这种按需加载路由的方式可以从根本解决 router 内部路由表大小的问题。
+
+假设项目中有 A 和 B 两个业务模块，当某次使用 App 时，仅需要调用 A 模块的路由，那么此时在路由表中仅需要存在 A 模块的路由即可，而 B 模块的路由应该等到使用 B 模块相关的路由时才注册。
+
+A 模块示例代码：
+
+```swift
+class AModuleImpl: NSObject, URLRouteModuleType {
+    
+    var delayedLoadingRoutes: [URLRouteName] { ["amodule"] }
+    
+    func configRoutes(with router: URLRouterType) {
+        router.registerRoute("amodule/a") { routeUrl, navigator in
+            navigator.push(APageViewController(), animated: true)
+            return true
+        }
+        
+        router.registerRoute("amodule/b") { routeUrl, navigator in
+            navigator.present(BPageViewController(), animated: true)
+            return true
+        }
+    }
+}
+```
+
+`AModuleImpl` 中的 `delayedLoadingRoutes` 返回了 `amodule`，这代表当 router 准备跳转某条路由时，如果该路由满足 scheme 为 default scheme，host 为 `amodule` 的话，会优先调用 `AModuleImpl` 的 `configRoutes(with router:)` 先注册路由（已经调用过的不会重复调用），再跳转。
 
 注意事项：
 
-+ 使用 URLRouter 类作为子 router 必须使用 `URLRouter.init(with: rootRouter)` 函数进行初始化，子 router 匹配不了的路由会交给它的 `upperRouter` 去转发，这里的 `upperRouter` 一般就是根 router
-+ `upperRouter` 使用`registerRoute(_ route: URLRouteConvertible, used subRouter: URLRouterType)` 函数提前绑定路由与子 router 的映射关系，以便跳转时能找到正确的子 router
-+ 注册子 router 的使用路由为聚合路由即 `scheme://host`，如注册的路由中携带 path 将会被忽略
++ `delayedLoadingRoutes` 中的路由需要与真正注册路由一致或为其聚合路由，建议使用聚合路由作为 `delayedLoadingRoutes` 数组中的元素。
 
 ### 兼容 OC
 
@@ -263,7 +277,7 @@ let viewController: UIViewController? = UIApplication.topViewController
 
 URLRouter 是面向协议进行开发的，开发者可以根据`URLRouteType`、`URLRouteParserType`以及`NavigatorType`提供的接口自定义规则进行实现。
 
-在基于 `URLRouteType` 自定义 router 尤其是根 router 时，除了路由注册与跳转的功能以外其他功能都是非必须功能可不实现，`URLRouteType` 的 extension 默认实现中会通过断言抛出异常来提示开发者使用了未实现的功能。
+~~在基于 `URLRouteType` 自定义 router 尤其是根 router 时，除了路由注册与跳转的功能以外其他功能都是非必须功能可不实现，`URLRouteType` 的 extension 默认实现中会通过断言抛出异常来提示开发者使用了未实现的功能。~~
 
 ## 要求
 

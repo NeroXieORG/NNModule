@@ -6,13 +6,14 @@
 //
 
 import XCTest
+//import NNModule_swift
 @testable import Example_URLRouter
 
 class Example_URLRouterTests: XCTestCase {
 
+//    var router = URLRouter()hao
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-//        URLRouter.default.routeParser.defaultScheme = "app"
     }
 
     override func tearDownWithError() throws {

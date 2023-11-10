@@ -9,7 +9,7 @@ import UIKit
 
 class ModuleTabServiceImpl: NSObject, ModuleTabService {
     
-    private var _tabBarController: UITabBarController?
+    public var _tabBarController: UITabBarController?
     
     private var tabItemImpls: [RegisterTabItemService] = []
     
@@ -50,25 +50,25 @@ class ModuleTabServiceImpl: NSObject, ModuleTabService {
     }
 }
 
-fileprivate class TabBarController: UITabBarController, UITabBarControllerDelegate {
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        delegate = self
-        
-        Module.tabService.setupTabBarController(with: self)
-        viewControllers = Module.tabService.tabBarItemMeta.map {  $0.viewController }
-    }
-    
-    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        let impl = Module.tabService.impl(in: tabBarController, of: viewController)
-        return impl?.tabBarController?(tabBarController, shouldSelect: viewController) ?? true
-    }
-    
-    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        let impl = Module.tabService.impl(in: tabBarController, of: viewController)
-        impl?.tabBarController?(tabBarController, didSelect: viewController)
-    }
-}
+//fileprivate class TabBarController: UITabBarController, UITabBarControllerDelegate {
+//    
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        
+//        delegate = self
+//        
+//        Module.tabService.setupTabBarController(with: self)
+//        viewControllers = Module.tabService.tabBarItemMeta.map {  $0.viewController }
+//    }
+//    
+//    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+//        let impl = Module.tabService.impl(in: tabBarController, of: viewController)
+//        return impl?.tabBarController?(tabBarController, shouldSelect: viewController) ?? true
+//    }
+//    
+//    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+//        let impl = Module.tabService.impl(in: tabBarController, of: viewController)
+//        impl?.tabBarController?(tabBarController, didSelect: viewController)
+//    }
+//}
 

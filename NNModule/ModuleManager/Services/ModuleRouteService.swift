@@ -8,7 +8,7 @@
 import Foundation
 
 /// Services used to provide routing
-@objc public protocol ModuleRouteService: ModuleFunctionalService, URLNestingRouterType, URLRouterTypeAttach {}
+@objc public protocol ModuleRouteService: ModuleFunctionalService, URLModularRouterType {}
 
 @objc extension URLRouter: ModuleRouteService {
     

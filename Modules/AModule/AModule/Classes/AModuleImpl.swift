@@ -15,6 +15,7 @@ extension Module.RegisterService {
 extension Module.Awake {
     
     @objc static func aModuleAwake() {
+        
         let subRouter = AModuleImpl.router
         Module.routeService.registerRoutes(["house", URLRouter.webLink], used: subRouter)
         Module.tabService.addRegister(AModuleImpl.self)
@@ -22,18 +23,21 @@ extension Module.Awake {
     }
 }
 
-class AModuleImpl: NSObject, RegisterTabItemService {
+class AModuleImpl: NSObject, RegisterTabItemService, URLRoutingModuleType {
 
-    fileprivate(set) static var router: URLRouter = {
-        let router = URLRouter(with: Module.routeService)
-        router.delayedRegisterRoute(URLRouter.webLink) { url, navigator in
+    var combinedRoutes: [URLRouteName] {
+        ["house"]
+    }
+    
+    func configRouter(_ router: URLRouterType) {
+        router.registerRoute(URLRouter.webLink) { url, navigator in
             guard let string = url.parameters["url"] as? String, let url = URL(string: string) else { return false }
             
             navigator.push(SFSafariViewController(url: url))
             return true
         }
         
-        router.delayedRegisterRoute("house") { routeUrl, navigator in
+        router.registerRoute("house") { routeUrl, navigator in
             switch routeUrl.path {
             case "/main":
                 let vc = HouseListViewController()
@@ -46,6 +50,18 @@ class AModuleImpl: NSObject, RegisterTabItemService {
             default: return false
             }
         }
+    }
+    
+    fileprivate(set) static var router: URLRouter = {
+        let router = URLRouter(with: Module.routeService)
+        router.delayedRegisterRoute(URLRouter.webLink) { url, navigator in
+            guard let string = url.parameters["url"] as? String, let url = URL(string: string) else { return false }
+            
+            navigator.push(SFSafariViewController(url: url))
+            return true
+        }
+        
+        
         
         return router
     }()

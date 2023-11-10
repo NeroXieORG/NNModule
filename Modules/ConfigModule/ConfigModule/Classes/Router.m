@@ -19,8 +19,6 @@ typedef void(^DelayedHandler)(id <URLRouterType>);
 
 @property (nonatomic, strong) id<NavigatorType> navigator;
 
-@property (nonatomic, weak) id<URLNestingRouterType> upperRouter;
-
 @property (nonatomic, strong) URLRouteRedirector *routeRedirector;
 
 @property (nonatomic, strong) URLRouteInterceptor *routeInterceptor;
@@ -55,22 +53,24 @@ typedef void(^DelayedHandler)(id <URLRouterType>);
 
 #pragma mark - URLRouteType
 
-- (id<URLRouteParserType>)routeParser {
-    return self.upperRouter.routeParser ?: _routeParser;
-}
-
-- (id<NavigatorType>)navigator {
-    return self.upperRouter.navigator ?: _navigator;
-}
-
-- (void)delayedRegisterRoute:(NSString *)route handleRouteFactory:(BOOL (^)(RouteURL *, id<NavigatorType>))handleRouteFactory {
-    [self.delayedHandlers addObject:^(id <URLRouterType> router) {
-        [router registerRoute:route handleRouteFactory:handleRouteFactory];
-    }];
-}
+//- (id<URLRouteParserType>)routeParser {
+//    return self.upperRouter.routeParser ?: _routeParser;
+//}
+//
+//- (id<NavigatorType>)navigator {
+//    return self.upperRouter.navigator ?: _navigator;
+//}
+//
+//- (void)delayedRegisterRoute:(NSString *)route handleRouteFactory:(BOOL (^)(RouteURL *, id<NavigatorType>))handleRouteFactory {
+//    [self.delayedHandlers addObject:^(id <URLRouterType> router) {
+//        [router registerRoute:route handleRouteFactory:handleRouteFactory];
+//    }];
+//}
 
 - (void)registerRoute:(NSString *)route handleRouteFactory:(BOOL (^)(RouteURL * _Nonnull, id<NavigatorType> _Nonnull))handleRouteFactory {
     RouteURL *routeUrl = [self.routeParser routeUrlFromRoute:route params:@{}];
+    
+    [self.routeRedirector routeRedirectDataFromRouteUrl:<#(RouteURL * _Nonnull)#> redirectRoute:<#(NSString * _Nonnull __autoreleasing * _Nonnull)#> redirectParams:<#(NSDictionary * _Nonnull __autoreleasing * _Nonnull)#>]
     if (!routeUrl) {
         NSString *message = [NSString stringWithFormat:@"route for (%@) is invalid", route];
         [self _routerLogWithMessage:message];
