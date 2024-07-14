@@ -59,7 +59,7 @@ class HouseListViewController: UIViewController, UITableViewDataSource, UITableV
     }
     
     @objc private func jumpToWebView() {
-        AModuleImpl.router.openRoute("house/add")
+        Module.routeService.openRoute("house/add")
     }
     
     @objc private func cancel() {

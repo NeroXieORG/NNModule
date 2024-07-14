@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <NNModule_swift/NNModule_swift-Swift.h>
+#import <NNModule_URLRouter/NNModule_URLRouter-Swift.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -9,6 +9,8 @@ import Foundation
 
 class ModuleLaunchTaskServiceImpl: NSObject, ModuleLaunchTaskService {
     
+//    static var implInstance: ModuleBasicService { ModuleLaunchTaskServiceImpl() }
+    
     private var syncMainTasks: [RegisterLaunchTaskService] = []
     
     private var asyncMainTasks: [RegisterLaunchTaskService] = []

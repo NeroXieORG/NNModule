@@ -3,10 +3,18 @@
 use_frameworks!
 #inhibit_all_warnings!
 
+#plugin 'nn-module', :static_frameworks_on => true
+#
+## 裁剪列表
+$pods_split_list = []
+
+
 platform :ios, '10.0'
 
 target 'Example_ModuleManager' do
   pod 'NNModule-swift', :path => '../'
+  pod 'NNModule-URLRouter', :path => '../'
+  pod 'NNModule-Notification', :path => '../'
 #  pod 'NNModule-swift/ModuleManager', :path => '../'
   pod 'ModuleServices', :path => '../Modules/ModuleServices'
   pod 'LoginModule', :path => '../Modules/LoginModule'
@@ -22,7 +30,6 @@ target 'Example_ModuleManager' do
   pod 'HandyJSON'
   pod 'MBProgressHUD'
 end
-
 
 post_install do |installer|
   installer.generated_projects.each do |project|
@@ -40,4 +47,6 @@ post_install do |installer|
     end
   end
 end
+
+
 

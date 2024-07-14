@@ -39,7 +39,6 @@ extension Module.Awake {
     }
 }
 
-
 final class ATestBridgeServiceImpl: NSObject, ATestBridgeService {
     
     func a_testMethod() {
@@ -62,7 +61,7 @@ final class BTestBridgeServiceImpl: NSObject, BTestBridgeService {
     }
 }
 
-class ATestBridgeServiceBridge: NSObject, ModuleServiceBridgeEnable {
+class ATestBridgeServiceBridge: NSObject, ModuleRegisteredService {
     
     required override init() {
         super.init()
@@ -79,10 +78,10 @@ class ATestBridgeServiceBridge: NSObject, ModuleServiceBridgeEnable {
         debugPrint("==== ATestBridgeServiceBridge a_1_testMethod ====")
     }
     
-    static var keepaliveRegiteredImpl: Bool { true }
+    static func keepaliveRegiteredImpl() -> Bool { true }
 }
 
-class BTestBridgeServiceBridge: NSObject, ModuleServiceBridgeEnable {
+class BTestBridgeServiceBridge: NSObject, ModuleRegisteredService {
     
     required override init() {
         super.init()
@@ -99,6 +98,6 @@ class BTestBridgeServiceBridge: NSObject, ModuleServiceBridgeEnable {
         debugPrint("==== BTestBridgeServiceBridge b_1_testMethod ====")
     }
     
-    static var keepaliveRegiteredImpl: Bool { true }
+    static func keepaliveRegiteredImpl() -> Bool { true }
 }
 

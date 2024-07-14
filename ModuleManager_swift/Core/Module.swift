@@ -30,7 +30,7 @@ import Foundation
 
 public extension Module {
     
-    fileprivate static var serviceCenter: ModuleServiceCenter { ModuleServiceCenter.shared }
+    internal static var serviceCenter: ModuleServiceCenter { ModuleServiceCenter.shared }
     
     static var routeService: ModuleRouteService { serviceImpl(of: ModuleRouteService.self) }
     
@@ -169,7 +169,7 @@ public extension Module {
     static func removeService(of serviceProtocol: Protocol) {
         serviceCenter.removeService(of: ServiceIdentifier(serviceProtocol))
     }
-    
+        
     @objc(bridgeMethod:ofServiceProtocol:usedClass:)
     /// Bridge a instance method in the service.
     /// - Parameters:
@@ -188,5 +188,12 @@ public extension Module {
     ///   - aClass: The class that implements the bridged class method.
     static func bridge(classMethod: Selector, of serviceProtocol: Protocol, used aClass: AnyClass) {
         serviceCenter.bridge(method: classMethod, isClassMethod: true, of: ServiceIdentifier(serviceProtocol), used: aClass)
+    }
+    
+    @objc(bridgeImplOfClass:)
+    /// Get the bridge impl instance of class
+    /// - Parameter implClass: The class that provides a service which conforms to protocol `ModuleRegisteredService`
+    static func bridgeImpl(of implClass: AnyClass) -> ModuleServiceBridgeEnable? {
+        serviceCenter.bridgeImpl(of: implClass)
     }
 }

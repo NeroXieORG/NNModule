@@ -7,14 +7,10 @@
 
 #import "ModuleConfigServiceImpl.h"
 
-@interface ModuleRegisterService (ModuleConfigService)
-
-@end
-
 @implementation ModuleRegisterService (ModuleConfigService)
 
 + (void)registerModuleConfigService {
-    [Module registerServiceOfProtocol:@protocol(ModuleConfigService) usedImplClass:ModuleConfigServiceImpl.class];
+    [Module registerService:@protocol(ModuleConfigService) usedClass:ModuleConfigServiceImpl.class];
 }
 
 @end

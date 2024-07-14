@@ -3,7 +3,6 @@ import ModuleServices
 import TabBarController
 import ESTabBarController_swift
 import BaseModule
-import SafariServices
 
 extension Module.RegisterService {
     
@@ -15,70 +14,41 @@ extension Module.RegisterService {
 extension Module.Awake {
     
     @objc static func aModuleAwake() {
-        
-        let subRouter = AModuleImpl.router
-        Module.routeService.registerRoutes(["house", URLRouter.webLink], used: subRouter)
         Module.tabService.addRegister(AModuleImpl.self)
         Module.launchTaskService.addRegister(ModuleLaunchTaskTest.self)
+        Module.routeService.addRouteModule(ARouteModule())
     }
 }
 
-class AModuleImpl: NSObject, RegisterTabItemService, URLRoutingModuleType {
-
-    var combinedRoutes: [URLRouteName] {
-        ["house"]
-    }
+class AModuleImpl: NSObject, RegisterTabService, NibLoadable {
     
-    func configRouter(_ router: URLRouterType) {
-        router.registerRoute(URLRouter.webLink) { url, navigator in
-            guard let string = url.parameters["url"] as? String, let url = URL(string: string) else { return false }
-            
-            navigator.push(SFSafariViewController(url: url))
-            return true
-        }
-        
-        router.registerRoute("house") { routeUrl, navigator in
-            switch routeUrl.path {
-            case "/main":
-                let vc = HouseListViewController()
-                vc.modalPresentationStyle = .fullScreen
-                navigator.present(vc, wrap: UINavigationController.self, animated: true)
-                return true
-            case "/add":
-                navigator.push(AddHouseViewController())
-                return true
-            default: return false
-            }
-        }
-    }
-    
-    fileprivate(set) static var router: URLRouter = {
-        let router = URLRouter(with: Module.routeService)
-        router.delayedRegisterRoute(URLRouter.webLink) { url, navigator in
-            guard let string = url.parameters["url"] as? String, let url = URL(string: string) else { return false }
-            
-            navigator.push(SFSafariViewController(url: url))
-            return true
-        }
-        
-        
-        
-        return router
-    }()
-    
-    override required init() {
+    required override init() {
         super.init()
+        
+        print("============\(type(of: self))===============")
+        let bundle1 = Bundle.init(for: type(of: self))
+        print(bundle1)
+        bundle1.paths(forResourcesOfType: "bundle", inDirectory: nil).forEach {
+            print($0)
+        }
+        
+        if let bundleURL = bundle1.url(forResource: nil, withExtension: "bundle") {
+            print("获取bundle url = \(bundleURL)")
+        }
     }
+    
+    // MARK: - RegisterTabItemService
     
     func setupTabBarController(_ tabBarController: UITabBarController) {
         if let tabBarController = tabBarController as? TabBarController {
             tabBarController.shouldHijackHandler = { _ ,_ , index in index == 1 }
-            tabBarController.didHijackHandler = { _, _, _ in AModuleImpl.router.openRoute("house/main") }
+            tabBarController.didHijackHandler = { _, _, _ in Module.routeService.openRoute("house/main") }
         }
     }
     
     func registerTabBarItems() -> [TabBarItemMeta] {
-        let bundle = resourceBundle(of: "AModule")
+//        let bundle = resourceBundle(of: "AModule")
+        let bundle = self.resourceBundle()
         var metaList = [TabBarItemMeta]()
         let configImpl = Module.serviceImpl(of: ModuleConfigService.self)
         
@@ -87,7 +57,9 @@ class AModuleImpl: NSObject, RegisterTabItemService, URLRoutingModuleType {
             let image = UIImage(named: "tabbar_houses_normal", in: bundle, compatibleWith: nil)
             let selectedImage = UIImage(named: "tabbar_houses_normal", in: bundle, compatibleWith: nil)
             nav.tabBarItem = ESTabBarItem(NormalTabBarItemContentView(), title: "example", image: image, selectedImage: selectedImage)
-            let meta = TabBarItemMeta(viewController: nav, tabIndex: index)
+            let meta = TabBarItemMeta()
+            meta.viewController = nav
+            meta.tabIndex = UInt(index)
             metaList.append(meta)
         }
         
@@ -95,10 +67,12 @@ class AModuleImpl: NSObject, RegisterTabItemService, URLRoutingModuleType {
             let vc = UIViewController()
             let image = UIImage(named: "tabbar_add", in: bundle, compatibleWith: nil)
             vc.tabBarItem = ESTabBarItem(LargeTabBarItemContentView(), title: "house", image: image)
-            let meta = TabBarItemMeta(viewController: vc, tabIndex: index)
+            let meta = TabBarItemMeta()
+            meta.viewController = vc
+            meta.tabIndex = UInt(index)
             metaList.append(meta)
         }
-
+        
         return metaList
     }
     
@@ -112,5 +86,6 @@ class AModuleImpl: NSObject, RegisterTabItemService, URLRoutingModuleType {
         print("\(type(of: self))：\(#function)")
     }
 }
+
 
 

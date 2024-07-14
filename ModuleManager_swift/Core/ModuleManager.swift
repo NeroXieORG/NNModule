@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import NNModule_URLRouter
 
 @objcMembers public final class ModuleManager: NSObject {
     
@@ -49,7 +50,7 @@ import UIKit
         let result = Module.applicationService.application?(application, didFinishLaunchingWithOptions: launchOptions) ?? true
 #if DEBUG
         print("application did finish launching")
-        Module.serviceInfoPrettyPrinted()
+        ModuleServiceCenter.shared.serviceInfoPrettyPrinted()
 #endif
         return result
     }

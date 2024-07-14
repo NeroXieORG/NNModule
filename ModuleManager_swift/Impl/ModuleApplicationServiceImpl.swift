@@ -10,8 +10,8 @@ import Foundation
 class ModuleApplicationServiceImpl: NSObject, ModuleApplicationService {
     
     var window: UIWindow?
-    
-    override required init() { super.init() }
+  
+    required override init() { super.init() }
     
     func applicationWillAwake() {}
     

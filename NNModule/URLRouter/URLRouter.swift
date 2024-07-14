@@ -25,7 +25,7 @@ import Foundation
     private var handleRouteFactories = [String: HandleRouteFactory]()
         
     @objc(defaultRouter)
-    public static var `default`: URLRouterType = URLRouter()
+    public static var `default` = URLRouter()
     
     // MARK: - Init Method
     
@@ -70,12 +70,13 @@ import Foundation
         
         let key = routeUrl.fullPath
         handleRouteFactories.removeValue(forKey: key)
+        
 //        routeModulesMap.removeValue(forKey: key)
     }
     
     public func removeAllRoutes() {
         handleRouteFactories = [:]
-//        routeModulesMap = [:]
+        routeModulesMap = [:]
     }
     
     @discardableResult
@@ -116,11 +117,13 @@ import Foundation
         return false
     }
     
+    // MARK: - URLRouterTypeAttach
+    
     public func addRouteModule(_ routeModule: URLRouteModuleType) {
         var delayedLoadingRoutes = Set<String>()
         for route in routeModule.delayedLoadingRoutes ?? [] {
             guard let routeUrl = routeParser.routeUrl(from: route) else {
-                URLRouterLog("route for (\(route)) is invalid")
+                URLRouterLog("Route for (\(route)) from (\(routeModule)) is invalid.")
                 continue
             }
             
@@ -134,7 +137,7 @@ import Foundation
         
         for route in delayedLoadingRoutes {
             if let oldRouteModule = routeModulesMap[route] {
-                URLRouterLog("Delayed loading route (\(route)) from \(routeModule) has been registered in \(oldRouteModule)")
+                URLRouterLog("Delayed loading route (\(route)) from \(routeModule) has been registered in \(oldRouteModule).")
                 continue
             }
             

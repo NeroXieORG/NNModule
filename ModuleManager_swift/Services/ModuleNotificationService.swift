@@ -39,21 +39,6 @@ import Foundation
     func removeStickyNotification(for name: Notification.Name)
 }
 
-public extension ModuleNotificationService {
-    
-    func addObserver(
-        forName name: NSNotification.Name?,
-        isSticky: Bool = false,
-        object: Any? = nil,
-        queue: OperationQueue? = nil,
-        using block: @escaping (Notification) -> Void
-    ) -> NotificationObserver {
-        addObserver(forName: name, isSticky: isSticky, object: object, queue: queue, using: block)
-    }
-    
-    func post(name: Notification.Name, isSticky: Bool = false, object: Any? = nil, userInfo: [AnyHashable : Any]? = nil) {
-        post(name: name, isSticky: isSticky, object: object, userInfo: userInfo)
-    }
-}
+
 
 

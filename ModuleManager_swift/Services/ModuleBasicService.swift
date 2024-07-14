@@ -28,10 +28,18 @@ import Foundation
 /// Register service.
 @objc public protocol ModuleRegisteredService: ModuleBasicService {
     
-    /// keep alive the instance
+    /// keep alive the instance if need.
     /// It will save the instance to a global map when return true.
+    /// The default value is false.
     @objc optional static var keepaliveRegiteredImpl: Bool { get }
 }
 
 /// Functional service birdge.
-@objc public protocol ModuleServiceBridgeEnable: ModuleRegisteredService {}
+@objc public protocol ModuleServiceBridgeEnable: ModuleBasicService {
+    
+    /// keep alive the bridge class instance if need.
+    /// It will save the instance to a global map when return true.
+    /// The default value is true.
+    @objc optional static var keepaliveBridgeImpl: Bool { get }
+}
+

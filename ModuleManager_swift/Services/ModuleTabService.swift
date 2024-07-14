@@ -10,18 +10,21 @@ import UIKit
 /// TabBar service.
 @objc public protocol ModuleTabService: ModuleFunctionalService {
     
-    /// The Type of tabBar controller
-    var tabBarControllerType: UITabBarController.Type { set get }
+//    /// The Type of tabBar controller
+//    var tabBarControllerType: UITabBarController.Type { set get }
     
     /// The instance of tabBar controller
-    var tabBarController: UITabBarController { get }
+    var tabBarController: UITabBarController? { set get }
     
     /// The meta of tabBar item
     var tabBarItemMeta: [TabBarItemMeta] { get }
     
-    /// Setup tabBar controller
-    /// - Parameter tabBarController: the instance of tabBarController
-    func setupTabBarController(with tabBarController: UITabBarController)
+    /// TabBar controller did load
+    func tabBarControllerDidLoad()
+    
+//    /// Setup tabBar controller
+//    /// - Parameter tabBarController: the instance of tabBarController
+//    func setupTabBarController(with tabBarController: UITabBarController)
     
     /// Add register of tabBar item
     func addRegister(_ register: RegisterTabItemService.Type)

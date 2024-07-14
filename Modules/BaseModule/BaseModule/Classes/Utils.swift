@@ -1,6 +1,23 @@
 import Foundation
 import SnapKit
 
+// MARK: - Nib load
+/// NNibLoadable用于解决组件化场景下资源加载的问题
+public protocol NibLoadable: AnyObject {}
+
+extension NibLoadable {
+    
+    public func resourceBundle() -> Bundle {
+        let bundle = Bundle(for: type(of: self))
+        guard let bundleURL = bundle.url(forResource: nil, withExtension: "bundle") else {
+            return bundle
+        }
+        
+        print("dadadasdsadasdasdasddsdasdasdasdasdasd")
+        return Bundle(url: bundleURL) ?? bundle
+    }
+}
+
 extension NSObject {
     
     public func resourceBundle(of name: String) -> Bundle {

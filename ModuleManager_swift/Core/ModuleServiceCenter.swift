@@ -86,27 +86,30 @@ final class ModuleServiceCenter {
     }
     
     func registerImpl(of implClass: AnyClass) -> ModuleRegisteredService? {
-        guard let registerImplClass = implClass as? ModuleRegisteredService.Type else {
-            return nil
+        if let newImplClass = implClass as? ModuleRegisteredService.Type {
+            let keepalive = newImplClass.keepaliveRegiteredImpl ?? false
+            return impl(of: newImplClass, needKeepalive: keepalive) as? ModuleRegisteredService
         }
         
-        let key = ObjectIdentifier(registerImplClass)
-        let keepaliveRegiteredImpl = registerImplClass.keepaliveRegiteredImpl ?? false
-        if keepaliveRegiteredImpl, let impl = implInstanceMap[key] {
-            return impl as? ModuleRegisteredService
+        return nil
+    }
+    
+    func bridgeImpl(of implClass: AnyClass) -> ModuleServiceBridgeEnable? {
+        if let newImplClass = implClass as? ModuleServiceBridgeEnable.Type {
+            let keepalive = newImplClass.keepaliveBridgeImpl ?? true
+            return impl(of: newImplClass, needKeepalive: keepalive) as? ModuleServiceBridgeEnable
         }
         
-        let newImpl = registerImplClass.implInstance ?? registerImplClass.init()
-        // save impl of this class if it is possible
-        if keepaliveRegiteredImpl { implInstanceMap[key] = newImpl }
-        
-        return newImpl as? ModuleRegisteredService
+        return nil
     }
     
     func removeService(of identifier: ServiceIdentifier) {
         guard let implClass = serviceTypeMap.removeValue(forKey: identifier) else { return }
         
+        // as registered service
         if (implClass as? ModuleRegisteredService.Type)?.keepaliveRegiteredImpl ?? false { return }
+        // as service bridge
+        if (implClass as? ModuleServiceBridgeEnable.Type)?.keepaliveBridgeImpl ?? true { return }
         if let _  = serviceTypeMap.first(where: { _, value in value == implClass }) { return }
         implInstanceMap.removeValue(forKey: ObjectIdentifier(implClass))
     }
@@ -122,19 +125,20 @@ final class ModuleServiceCenter {
             return
         }
         
-        var proxy = proxyList.first { $0.identifier == identifier.value }
-        if proxy == nil {
-            proxy = ServiceBridgeProxy(identifier: identifier.value)
-            proxyList.append(proxy!)
+        if let proxy = proxyList.first(where: { $0.identifier == identifier.value }) {
+            proxy.setBridgeClass(aClass, forMethod: method, isClassMethod: isClassMethod)
+            return
         }
         
-        proxy?.setBridgeClass(aClass, forMethod: method, isClassMethod: isClassMethod)
+        let proxy = ServiceBridgeProxy(identifier: identifier.value)
+        proxy.setBridgeClass(aClass, forMethod: method, isClassMethod: isClassMethod)
+        proxyList.append(proxy)
     }
     
     func serviceInfoPrettyPrinted() {
 #if DEBUG
         let newProxyList = proxyList.map {
-            guard let data = $0.description.data(using: .utf8),
+            guard let data = $0.proxyInfo().data(using: .utf8),
                   let json = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String: Any] else {
                 return [String: Any]()
             }
@@ -153,5 +157,22 @@ final class ModuleServiceCenter {
             print("service info = \(jsonString)")
         }
 #endif
+    }
+    
+    private func impl(of implClass: AnyClass, needKeepalive keepalive: Bool) -> AnyObject? {
+        guard let newImplClass = implClass as? ModuleBasicService.Type else {
+            return nil
+        }
+        
+        let key = ObjectIdentifier(newImplClass)
+        if keepalive, let impl = implInstanceMap[key] {
+            return impl
+        }
+        
+        let newImpl = newImplClass.implInstance ?? newImplClass.init()
+        // save impl of this class if it is possible
+        if keepalive { implInstanceMap[key] = newImpl }
+        
+        return newImpl
     }
 }

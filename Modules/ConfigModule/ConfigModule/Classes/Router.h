@@ -10,8 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Router : NSObject <ModuleRouteService>
-
-@end
+//@interface Router : NSObject <ModuleRouteService>
+//
+//@end
 
 NS_ASSUME_NONNULL_END

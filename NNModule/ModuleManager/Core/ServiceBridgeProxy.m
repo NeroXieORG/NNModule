@@ -1,12 +1,13 @@
 //
 //  ServiceBridgeProxy.m
-//  NNModule-swift
+//  ModuleManagment
 //
-//  Created by NeroXie on 2023/5/29.
+//  Created by NeroXie on 2023/11/1.
 //
 
 #import "ServiceBridgeProxy.h"
-#import <NNModule_swift/NNModule_swift-Swift.h>
+#import "Module.h"
+#import <objc/runtime.h>
 
 typedef NSMutableDictionary<NSString *, Class> *MethodMirror;
 
@@ -118,6 +119,7 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
     return map;
 }
 
+#ifdef DEBUG
 - (NSString *)description {
     NSDictionary *newMethodMap = @{
         @"classMethod": NSMutableDictionary.dictionary,
@@ -140,5 +142,6 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
     NSData *mapData = [NSJSONSerialization dataWithJSONObject:map options: NSJSONWritingPrettyPrinted error:nil];
     return [[NSString alloc] initWithData:mapData encoding:NSUTF8StringEncoding];
 }
+#endif
 
 @end

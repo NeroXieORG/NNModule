@@ -15,8 +15,6 @@ import NNModule_swift
     var tabBarControllerType: UITabBarController.Type { get }
     
     var tabBarItems: [String] { get }
-    
-//    func tabBarItemIndex(for itemName: String) -> Int
 }
 
 extension ModuleConfigService {

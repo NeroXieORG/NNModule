@@ -8,22 +8,18 @@ extension Module.RegisterService {
     
     @objc static func applicationModule() {
         Module.register(service: ModuleApplicationService.self, used: ApplicationModuleImpl.self)
-        Module.register(service: ModuleRouteService.self, used: Router.self)
     }
 }
 
-class ApplicationModuleImpl: NSObject, ModuleApplicationService {
-    
-    static var implPriority: Int { 100 }
+class ApplicationModuleImpl: NSObject, ModuleApplicationService, DeviceBizService {
         
+    static func implPriority() -> Int { 100 }
+    
     var window: UIWindow?
     
     required override init() { super.init() }
     
-    func applicationWillAwake() {
-        let config = Module.serviceImpl(of: ModuleConfigService.self)
-        Module.tabService.tabBarControllerType = config.tabBarControllerType
-    }
+    func applicationWillAwake() {}
     
     func application(
         _ application: UIApplication,
@@ -57,12 +53,17 @@ class ApplicationModuleImpl: NSObject, ModuleApplicationService {
     }
     
     func reloadMainViewController() {
+        let viewController: UIViewController
         let loginImpl = Module.serviceImpl(of: LoginService.self)
         if loginImpl.isLogin {
+            let configImpl = Module.serviceImpl(of: ModuleConfigService.self)
+            viewController = configImpl.tabBarControllerType.init()
+        } else {
             MockServer.shared.reset()
             Module.tabService.needReloadTabBarController()
+            viewController = loginImpl.loginMain
         }
-        let viewController: UIViewController = loginImpl.isLogin ? Module.tabService.tabBarController : loginImpl.loginMain
+        
         window?.rootViewController = viewController
     }
     
