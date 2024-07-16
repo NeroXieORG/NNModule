@@ -16,6 +16,7 @@ NNModule-swift 提供的功能如下：
 + 组件化管理器：[ModuleManager](./Resources/ModuleManager.md)
 + 路由：[URLRouter](./Resources/URLRouter.md)
 + 带黏连值的 Notification：[StickyNotification](./Resources/StickyNotification.md)
++ Service 方法桥接：[ServiceBridge](./Resources/ServiceBridge.md)
 
 **仅 Swift 支持的功能**
 
@@ -27,6 +28,7 @@ NNModule-swift 提供的功能如下：
 --------- | ------------- 
 v1.0.5 | 正式版
 v1.0.6 | ModuleManager，URLRouter，StickyNotification 支持 OC
+v1.0.7 | Service 方法支持桥接，URLRouter 按需加载路由，废弃路由嵌套
 
 ## 使用
 
