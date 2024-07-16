@@ -1,13 +1,12 @@
 //
 //  ServiceBridgeProxy.m
-//  ModuleManagment
+//  NNModule-swift
 //
-//  Created by NeroXie on 2023/11/1.
+//  Created by NeroXie on 2023/5/29.
 //
 
 #import "ServiceBridgeProxy.h"
-#import "Module.h"
-#import <objc/runtime.h>
+#import <NNModule_swift/NNModule_swift-Swift.h>
 
 typedef NSMutableDictionary<NSString *, Class> *MethodMirror;
 
@@ -17,7 +16,7 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
 
 @property (nonatomic, copy) NSString *identifier;
 
-@property (nonatomic, strong) NSMapTable<NSString *, id> *bridgeImplMap;
+//@property (nonatomic, strong) NSMapTable<NSString *, id> *bridgeImplMap;
 
 @end
 
@@ -51,6 +50,24 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
     }
 }
 
+- (NSString *)proxyInfo {
+    NSDictionary *newMethodMap = @{
+        @"classMethod": NSMutableDictionary.dictionary,
+        @"instanceMethod": NSMutableDictionary.dictionary
+    };
+    
+    [[self.class methodMirrorMap] enumerateKeysAndObjectsUsingBlock:^(NSString *key, MethodMirror methodMirror, BOOL *stop) {
+        NSMutableDictionary *dict = newMethodMap[key];
+        [methodMirror enumerateKeysAndObjectsUsingBlock:^(NSString *key, Class bridgeClass, BOOL *stop) {
+            dict[key] = NSStringFromClass(bridgeClass);
+        }];
+    }];
+    
+    NSDictionary *map = @{ @"identifier": self.identifier, @"bridgeMethodMap": newMethodMap };
+    NSData *mapData = [NSJSONSerialization dataWithJSONObject:map options: NSJSONWritingPrettyPrinted error:nil];
+    return [[NSString alloc] initWithData:mapData encoding:NSUTF8StringEncoding];
+}
+
 - (void)setNativeImpl:(id)nativeImpl {
     _nativeImpl = nativeImpl;
     Class implClass = nativeImpl ? [nativeImpl class] : nil;
@@ -59,8 +76,8 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
 
 - (id)forwardingTargetForSelector:(SEL)selector {
     NSString *methodName = NSStringFromSelector(selector);
-    id bridgeImpl = [self.bridgeImplMap objectForKey:methodName];
-    if (bridgeImpl) return bridgeImpl;
+//    id bridgeImpl = [self.bridgeImplMap objectForKey:methodName];
+//    if (bridgeImpl) return bridgeImpl;
     
     MethodMirrorMap map = [self.class methodMirrorMap];
     MethodMirror instanceMethodMirror = map[@"instanceMethod"];
@@ -68,7 +85,7 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
     if (bridgeClass) {
         id newImpl = [Module registerImplOfClass:bridgeClass];
         if (newImpl && [newImpl respondsToSelector:selector]) {
-            [self.bridgeImplMap setObject:newImpl forKey:methodName];
+//            [self.bridgeImplMap setObject:newImpl forKey:methodName];
             return newImpl;
         }
     }
@@ -89,6 +106,10 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
     return [self.nativeImpl conformsToProtocol:aProtocol];
 }
 
+- (BOOL)isKindOfClass:(Class)aClass {
+    return [self.nativeImpl isKindOfClass:aClass];
+}
+
 - (BOOL)isProxy {
     return YES;
 }
@@ -101,11 +122,11 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
     objc_setAssociatedObject(self, @selector(nativeImplClass), nativeImplClass, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (NSMapTable<NSString *,id> *)bridgeImplMap {
-    if (!_bridgeImplMap) _bridgeImplMap = NSMapTable.strongToWeakObjectsMapTable;
-    
-    return _bridgeImplMap;
-}
+//- (NSMapTable<NSString *,id> *)bridgeImplMap {
+//    if (!_bridgeImplMap) _bridgeImplMap = NSMapTable.strongToWeakObjectsMapTable;
+//    
+//    return _bridgeImplMap;
+//}
 
 + (MethodMirrorMap)methodMirrorMap {
     MethodMirrorMap map = objc_getAssociatedObject(self, @selector(methodMirrorMap));
@@ -119,29 +140,22 @@ typedef NSMutableDictionary<NSString *, MethodMirror> *MethodMirrorMap;
     return map;
 }
 
-#ifdef DEBUG
-- (NSString *)description {
-    NSDictionary *newMethodMap = @{
-        @"classMethod": NSMutableDictionary.dictionary,
-        @"instanceMethod": NSMutableDictionary.dictionary
-    };
-    
-    [[self.class methodMirrorMap] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, MethodMirror  _Nonnull methodMirror, BOOL * _Nonnull stop) {
-        NSMutableDictionary *dict = newMethodMap[key];
-        [methodMirror enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class  _Nonnull bridgeClass, BOOL * _Nonnull stop) {
-            dict[key] = NSStringFromClass(bridgeClass);
-        }];
-    }];
-    
-    NSDictionary *map = @{
-        @"identifier": self.identifier,
-        @"nativeImplClass": NSStringFromClass([self.class nativeImplClass]) ?: @"",
-        @"bridgeMethodMap": newMethodMap
-    };
-    
-    NSData *mapData = [NSJSONSerialization dataWithJSONObject:map options: NSJSONWritingPrettyPrinted error:nil];
-    return [[NSString alloc] initWithData:mapData encoding:NSUTF8StringEncoding];
-}
-#endif
+//- (NSString *)description {
+//    NSDictionary *newMethodMap = @{
+//        @"classMethod": NSMutableDictionary.dictionary,
+//        @"instanceMethod": NSMutableDictionary.dictionary
+//    };
+//    
+//    [[self.class methodMirrorMap] enumerateKeysAndObjectsUsingBlock:^(NSString *key, MethodMirror methodMirror, BOOL *stop) {
+//        NSMutableDictionary *dict = newMethodMap[key];
+//        [methodMirror enumerateKeysAndObjectsUsingBlock:^(NSString *key, Class bridgeClass, BOOL *stop) {
+//            dict[key] = NSStringFromClass(bridgeClass);
+//        }];
+//    }];
+//    
+//    NSDictionary *map = @{ @"identifier": self.identifier, @"bridgeMethodMap": newMethodMap };
+//    NSData *mapData = [NSJSONSerialization dataWithJSONObject:map options: NSJSONWritingPrettyPrinted error:nil];
+//    return [[NSString alloc] initWithData:mapData encoding:NSUTF8StringEncoding];
+//}
 
 @end

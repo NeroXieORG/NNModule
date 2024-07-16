@@ -14,7 +14,7 @@ extension Module.Awake {
     
     @objc static func houseManagerAwake() {
         let manager = HouseManager.shared
-        Module.notificationService.addObserver(forName: .didLoginSuccess) { [weak manager] _ in
+        Module.notificationService.addObserver(forName: .didLoginSuccess, isSticky: false, object: nil, queue: nil) { [weak manager] _ in
             manager?.houseList = []
             manager?.updateHouseList()
         }.disposed(by: manager)

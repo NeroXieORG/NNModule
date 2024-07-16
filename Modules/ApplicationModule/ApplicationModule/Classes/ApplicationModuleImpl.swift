@@ -11,9 +11,9 @@ extension Module.RegisterService {
     }
 }
 
-class ApplicationModuleImpl: NSObject, ModuleApplicationService, DeviceBizService {
-        
-    static func implPriority() -> Int { 100 }
+class ApplicationModuleImpl: NSObject, ModuleApplicationService {
+    
+    static var implPriority: Int { 100 }
     
     var window: UIWindow?
     

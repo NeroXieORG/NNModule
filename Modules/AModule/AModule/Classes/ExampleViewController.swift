@@ -13,7 +13,8 @@ class ExampleViewController: UIViewController, UITableViewDataSource, UITableVie
     let tableView = UITableView(frame: .zero, style: .plain)
     
     let data = [
-        ("Service bridge test", "cmodule/bridgetest")
+        ("Service bridge test", "cmodule/bridgetest"),
+        ("open dmoule/main", "dmodule/main")
     ]
     
     override func viewDidLoad() {

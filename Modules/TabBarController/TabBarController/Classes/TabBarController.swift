@@ -10,9 +10,8 @@ public class TabBarController: ESTabBarController {
         setupTabbar()
         
         delegate = self
-        Module.tabService.tabBarController = self
-        Module.tabService.tabBarControllerDidLoad()
-        viewControllers = Module.tabService.tabBarItems.map { $0.viewController }
+        Module.tabService.didLoadTabBarController(self)
+        viewControllers = Module.tabService.tabBarItemMetaList.map { $0.viewController }
     }
     
     // MARK: - Private Method
@@ -52,12 +51,12 @@ public class TabBarController: ESTabBarController {
 extension TabBarController: UITabBarControllerDelegate {
     
     public func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        let impl = Module.tabService.impl(in: tabBarController, viewcontroller: viewController)
+        let impl = Module.tabService.tabItemImpl(in: tabBarController, of: viewController)
         return impl?.tabBarController?(tabBarController, shouldSelect: viewController) ?? true
     }
     
     public func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        let impl = Module.tabService.impl(in: tabBarController, viewcontroller: viewController)
+        let impl = Module.tabService.tabItemImpl(in: tabBarController, of: viewController)
         impl?.tabBarController?(tabBarController, didSelect: viewController)
     }
 }

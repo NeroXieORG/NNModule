@@ -19,7 +19,7 @@ import Foundation
     public private(set) var routeRedirector: URLRouteRedirector
     
     public private(set) var routeInterceptor: URLRouteInterceptor
-    
+        
     private var routeModulesMap = [String: URLRouteModuleType]()
     
     private var handleRouteFactories = [String: HandleRouteFactory]()
@@ -70,8 +70,7 @@ import Foundation
         
         let key = routeUrl.fullPath
         handleRouteFactories.removeValue(forKey: key)
-        
-//        routeModulesMap.removeValue(forKey: key)
+        routeModulesMap.removeValue(forKey: key)
     }
     
     public func removeAllRoutes() {

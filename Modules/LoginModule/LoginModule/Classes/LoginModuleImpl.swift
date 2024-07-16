@@ -19,7 +19,7 @@ extension Module.RegisterService {
 extension Module.Awake {
     
     @objc static func loginModuleAwake() {
-        Module.routeService.registerRouteModule(LoginModuleImpl.self)
+        Module.routeService.addRouteModuleRegister(LoginModuleImpl.self)
     }
 }
 

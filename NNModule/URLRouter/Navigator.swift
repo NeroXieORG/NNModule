@@ -17,6 +17,9 @@ import UIKit
     ///   - animated: Specify true to animate the transition or false if you do not want the transition to be animated.
     func push(_ viewController: UIViewController, from: UINavigationController?, animated: Bool)
     
+    @objc(pushViewController:animated:)
+    func push(_ viewController: UIViewController, animated: Bool)
+    
     @objc(presentViewController:wrap:from:animated:completion:)
     /// Presents a matching view controller.
     /// - Parameters:
@@ -25,13 +28,10 @@ import UIKit
     ///   - from: The current view controller.
     ///   - animated: Pass true to animate the presentation.
     ///   - completion: The block to execute after the presentation finishes.
-    func present(
-        _ viewController: UIViewController,
-        wrap: UINavigationController.Type?,
-        from: UIViewController?,
-        animated: Bool,
-        completion: (() -> Void)?
-    )
+    func present(_ viewController: UIViewController, wrap: UINavigationController.Type?, from: UIViewController?, animated: Bool, completion: (() -> Void)?)
+    
+    @objc(presentViewController:animated:completion:)
+    func present(_ viewController: UIViewController, animated: Bool, completion: (() -> Void)?)
 }
 
 public extension NavigatorType {
@@ -40,13 +40,7 @@ public extension NavigatorType {
         push(viewController, from: from, animated: animated)
     }
     
-    func present(
-        _ viewController: UIViewController,
-        wrap: UINavigationController.Type? = nil,
-        from: UIViewController? = nil,
-        animated: Bool = true,
-        completion: (() -> Void)? = nil
-    ) {
+    func present(_ viewController: UIViewController, wrap: UINavigationController.Type? = nil, from: UIViewController? = nil, animated: Bool = true, completion: (() -> Void)? = nil) {
         present(viewController, wrap: wrap, from: from, animated: animated, completion: completion)
     }
 }
@@ -55,6 +49,10 @@ public class Navigator: NSObject, NavigatorType {
     
     public override init() { super.init() }
     
+    public func push(_ viewController: UIViewController, animated: Bool) {
+        push(viewController, from: nil, animated: animated)
+    }
+    
     public func push(_ viewController: UIViewController, from: UINavigationController?, animated: Bool) {
         guard (viewController is UINavigationController) == false else { return }
         guard let navigationController = from ?? UIApplication.topViewController?.navigationController else { return }
@@ -62,13 +60,11 @@ public class Navigator: NSObject, NavigatorType {
         navigationController.pushViewController(viewController, animated: animated)
     }
     
-    public func present(
-        _ viewController: UIViewController,
-        wrap: UINavigationController.Type?,
-        from: UIViewController?,
-        animated: Bool,
-        completion: (() -> Void)?
-    ) {
+    public func present(_ viewController: UIViewController, animated: Bool, completion: (() -> Void)?) {
+        present(viewController, wrap: nil, from: nil, animated: animated, completion: completion)
+    }
+    
+    public func present(_ viewController: UIViewController, wrap: UINavigationController.Type?, from: UIViewController?, animated: Bool, completion: (() -> Void)?) {
         guard let fromViewController = from ?? UIApplication.topViewController else { return }
         
         let viewControllerToPresent: UIViewController

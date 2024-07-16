@@ -13,14 +13,14 @@ internal final class LoginManager: NSObject, LoginService {
         UINavigationController(rootViewController: LoginViewController())
     }
     
-    static func implInstance() -> any ModuleBasicService { shared }
+    static var implInstance: ModuleBasicService { shared }
     
     func logout() { updateLoginStatus(false) }
     
     func updateLoginStatus(_ loginStatus: Bool) {
         isLogin = loginStatus
         let notification: Notification.Name = loginStatus ? .didLoginSuccess : .didLogoutSuccess
-        Module.notificationService.postNotification(notification)
+        Module.notificationService.postNotification(for: notification, isSticky: false, object: nil, userInfo: nil)
     }
 }
 

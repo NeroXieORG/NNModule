@@ -28,6 +28,9 @@ PODS:
   - ConfigModule (0.1.0):
     - ModuleServices
     - NNModule-swift/ModuleManager
+  - DModule (0.1.0):
+    - ModuleServices
+    - NNModule-swift
   - ESTabBarController-swift (2.8.0)
   - HandyJSON (5.0.2)
   - LoginModule (0.1.0):
@@ -38,13 +41,17 @@ PODS:
   - ModuleServices (0.1.0):
     - HandyJSON
     - NNModule-swift
-  - NNModule-Notification (1.0.0)
   - NNModule-swift (1.0.6):
+    - NNModule-swift/EventTransfer (= 1.0.6)
     - NNModule-swift/ModuleManager (= 1.0.6)
+    - NNModule-swift/StickyNotification (= 1.0.6)
+    - NNModule-swift/URLRouter (= 1.0.6)
+  - NNModule-swift/EventTransfer (1.0.6)
   - NNModule-swift/ModuleManager (1.0.6):
-    - NNModule-Notification
-    - NNModule-URLRouter
-  - NNModule-URLRouter (1.0.0)
+    - NNModule-swift/StickyNotification
+    - NNModule-swift/URLRouter
+  - NNModule-swift/StickyNotification (1.0.6)
+  - NNModule-swift/URLRouter (1.0.6)
   - SnapKit (5.6.0)
   - TabBarController (0.1.0):
     - BaseModule
@@ -58,14 +65,13 @@ DEPENDENCIES:
   - BModule (from `../Modules/BModule`)
   - CModule (from `../Modules/CModule`)
   - ConfigModule (from `../Modules/ConfigModule`)
+  - DModule (from `../Modules/DModule`)
   - ESTabBarController-swift
   - HandyJSON
   - LoginModule (from `../Modules/LoginModule`)
   - MBProgressHUD
   - ModuleServices (from `../Modules/ModuleServices`)
-  - NNModule-Notification (from `../`)
   - NNModule-swift (from `../`)
-  - NNModule-URLRouter (from `../`)
   - SnapKit
   - TabBarController (from `../Modules/TabBarController`)
 
@@ -89,15 +95,13 @@ EXTERNAL SOURCES:
     :path: "../Modules/CModule"
   ConfigModule:
     :path: "../Modules/ConfigModule"
+  DModule:
+    :path: "../Modules/DModule"
   LoginModule:
     :path: "../Modules/LoginModule"
   ModuleServices:
     :path: "../Modules/ModuleServices"
-  NNModule-Notification:
-    :path: "../"
   NNModule-swift:
-    :path: "../"
-  NNModule-URLRouter:
     :path: "../"
   TabBarController:
     :path: "../Modules/TabBarController"
@@ -107,19 +111,18 @@ SPEC CHECKSUMS:
   ApplicationModule: b9dc412f931f0d8969ff9a75bf081a6bb3e619f2
   BaseModule: 7dcb4d56db42ad8afe269326a86147d0fb1b0f46
   BModule: 97e33a3be84360849b7ae53eacf881bcf10c8006
-  CModule: c213f13831ab6a0229c5b734c8b767d60557852d
+  CModule: 41b0506fa48c10a4992f565c4d61ba62446bf0f9
   ConfigModule: 3dc42208ac0e0bd8830dcb5caed6cb40427c7f1f
+  DModule: 9bff0305ff3299afa19d66d868978b38122e2b54
   ESTabBarController-swift: 05593a6ad64700b03c0eb60ff625916370aa4136
   HandyJSON: 9e4e236f5d2dbefad5155a77417bbea438201c03
   LoginModule: 4273b8c921ec0367846b6961248b2b5ef29655a0
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   ModuleServices: 890f7568b55e59356cf41d56300698c853b151e4
-  NNModule-Notification: 94dc43393afac15ff025b5ba30abafb2e2798964
-  NNModule-swift: b3e3533678c8d029368c57f532af7782067e8dad
-  NNModule-URLRouter: 6740b68679c7638e2b6b8007bc4eb0537fc3e3b5
+  NNModule-swift: d8d8dcc1302ed93ca262dfe5d44e8c2eca4a9b56
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   TabBarController: 1022ae0cd42087e68fa1092da506a4ed9410b2e0
 
-PODFILE CHECKSUM: 56b8f82ed5347e3bff0d4b9e8a99ef3122f65fe1
+PODFILE CHECKSUM: c73523024100b5483c08d0ff1a55edfdbf430932
 
 COCOAPODS: 1.15.2

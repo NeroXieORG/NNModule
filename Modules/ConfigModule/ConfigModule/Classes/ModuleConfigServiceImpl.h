@@ -6,8 +6,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <NNModule_swift/Module.h>
 #import <ModuleServices/ModuleServices-Swift.h>
+#import <NNModule_swift/NNModule_swift-Swift.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

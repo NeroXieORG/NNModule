@@ -3,6 +3,7 @@ import ModuleServices
 import TabBarController
 import ESTabBarController_swift
 import BaseModule
+import SafariServices
 
 extension Module.RegisterService {
     
@@ -15,12 +16,14 @@ extension Module.Awake {
     
     @objc static func aModuleAwake() {
         Module.tabService.addRegister(AModuleImpl.self)
+        Module.tabService.addRegister(AModuleImpl.self)
+        Module.tabService.addRegister(AModuleImpl.self)
         Module.launchTaskService.addRegister(ModuleLaunchTaskTest.self)
-        Module.routeService.addRouteModule(ARouteModule())
+        Module.routeService.addRouteModuleRegister(AModuleImpl.self)
     }
 }
 
-class AModuleImpl: NSObject, RegisterTabService, NibLoadable {
+class AModuleImpl: NSObject, RegisterTabService, NibLoadable, RegisterRouteModuleService {
     
     required override init() {
         super.init()
@@ -34,6 +37,36 @@ class AModuleImpl: NSObject, RegisterTabService, NibLoadable {
         
         if let bundleURL = bundle1.url(forResource: nil, withExtension: "bundle") {
             print("获取bundle url = \(bundleURL)")
+        }
+    }
+    
+    // MARK: -
+    static var keepaliveRegiteredImpl: Bool { true}
+    
+    // MARK: - RegisterRouteModuleService
+    
+    var delayedLoadingRoutes: [URLRouteName] { ["house", URLRouter.webLink] }
+    
+    func configRoutes(with router: URLRouterType) {
+        router.registerRoute(URLRouter.webLink) { url, navigator in
+            guard let string = url.parameters["url"] as? String, let url = URL(string: string) else { return false }
+            
+            navigator.push(SFSafariViewController(url: url))
+            return true
+        }
+        
+        router.registerRoute("house") { routeUrl, navigator in
+            switch routeUrl.path {
+            case "/main":
+                let vc = HouseListViewController()
+                vc.modalPresentationStyle = .fullScreen
+                navigator.present(vc, wrap: UINavigationController.self, animated: true)
+                return true
+            case "/add":
+                navigator.push(AddHouseViewController())
+                return true
+            default: return false
+            }
         }
     }
     
@@ -57,9 +90,7 @@ class AModuleImpl: NSObject, RegisterTabService, NibLoadable {
             let image = UIImage(named: "tabbar_houses_normal", in: bundle, compatibleWith: nil)
             let selectedImage = UIImage(named: "tabbar_houses_normal", in: bundle, compatibleWith: nil)
             nav.tabBarItem = ESTabBarItem(NormalTabBarItemContentView(), title: "example", image: image, selectedImage: selectedImage)
-            let meta = TabBarItemMeta()
-            meta.viewController = nav
-            meta.tabIndex = UInt(index)
+            let meta = TabBarItemMeta(viewController: nav, tabIndex: index)
             metaList.append(meta)
         }
         
@@ -67,9 +98,7 @@ class AModuleImpl: NSObject, RegisterTabService, NibLoadable {
             let vc = UIViewController()
             let image = UIImage(named: "tabbar_add", in: bundle, compatibleWith: nil)
             vc.tabBarItem = ESTabBarItem(LargeTabBarItemContentView(), title: "house", image: image)
-            let meta = TabBarItemMeta()
-            meta.viewController = vc
-            meta.tabIndex = UInt(index)
+            let meta = TabBarItemMeta(viewController: vc, tabIndex: index)
             metaList.append(meta)
         }
         

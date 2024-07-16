@@ -61,6 +61,7 @@ public typealias HandleRouteFactory = (_ routeUrl: RouteURL, _ navigator: Naviga
     /// `delayedLoadingRoutes` should preferably return combined routes.
     @objc optional var delayedLoadingRoutes: [URLRouteName] { get }
     
+    @objc(configRoutesWithRouter:)
     /// Configure routes for the current module.
     /// - Parameter router: A router
     func configRoutes(with router: URLRouterType)

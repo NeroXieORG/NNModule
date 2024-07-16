@@ -23,9 +23,7 @@ class BModuleImpl: NSObject, RegisterTabService {
         let image = UIImage(named: "tabbar_user_normal", in: bundle, compatibleWith: nil)
         let selectedImage = UIImage(named: "tabbar_user_normal", in: bundle, compatibleWith: nil)
         nav.tabBarItem = ESTabBarItem(NormalTabBarItemContentView(), title: "user", image: image, selectedImage: selectedImage)
-        let meta = TabBarItemMeta()
-        meta.viewController = nav
-        meta.tabIndex = UInt(index)
+        let meta = TabBarItemMeta(viewController: nav, tabIndex: index)
         
         return [meta]
     }

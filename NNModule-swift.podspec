@@ -16,30 +16,35 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/YiHuaXie/NNModule.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
+#  s.source_files = 'NNModule/ModuleManager/**/*'
+#  s.dependency 'NNModule-URLRouter'
+#  s.dependency 'NNModule-Notification'
+  
   s.ios.deployment_target = '10.0'
   s.swift_version = '5.0'
 
   # ModuleManager
   s.subspec 'ModuleManager' do |ss|
     ss.source_files = 'NNModule/ModuleManager/**/*'
-    ss.dependency 'NNModule-URLRouter'
-    ss.dependency 'NNModule-Notification'
+    ss.dependency 'NNModule-swift/URLRouter'
+    ss.dependency 'NNModule-swift/StickyNotification'
+#    ss.dependency 'NNModule-swift/EventTransfer'
   end
   
-  # # URLRouter
-  # s.subspec 'URLRouter' do |ss|
-  #   ss.source_files = 'NNModule/URLRouter/*'
-  # end
+  # URLRouter
+  s.subspec 'URLRouter' do |ss|
+    ss.source_files = 'NNModule/URLRouter/*'
+  end
 
   # EventTransfer
-  # s.subspec 'EventTransfer' do |ss|
-  #   ss.source_files = 'NNModule/EventTransfer/*'
-  # end
+  s.subspec 'EventTransfer' do |ss|
+    ss.source_files = 'NNModule/EventTransfer/*'
+  end
 
-  # # StickyNotification
-  # s.subspec 'StickyNotification' do |ss|
-  #   ss.source_files = 'NNModule/StickyNotification/*'
-  # end
+  # StickyNotification
+  s.subspec 'StickyNotification' do |ss|
+    ss.source_files = 'NNModule/StickyNotification/*'
+  end
   # s.resource_bundles = {
   #   'NNModule' => ['NNModule/Assets/*.png']
   # }

@@ -1,30 +1,25 @@
 //
 //  ServiceBridgeProxy.h
-//  ModuleManagment
+//  NNModule-swift
 //
-//  Created by NeroXie on 2023/11/1.
+//  Created by NeroXie on 2023/5/29.
 //
 
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// Service 方法桥接
-@interface ServiceBridgeProxy : NSProxy
+@interface ServiceBridgeProxy : NSObject
 
-/// Service 标识
 @property (nonatomic, copy, readonly) NSString *identifier;
 
-/// Service 的原始实现类实例
 @property (nonatomic, weak) id nativeImpl;
-
-+ (instancetype)new NS_UNAVAILABLE;
-
-- (instancetype)init NS_UNAVAILABLE;
 
 + (instancetype)proxyWithIdentifier:(NSString *)identifier;
 
 - (void)setBridgeClass:(Class)bridgeClass forMethod:(SEL)method isClassMethod:(BOOL)isClassMethod;
+
+- (NSString *)proxyInfo;
 
 @end
 
