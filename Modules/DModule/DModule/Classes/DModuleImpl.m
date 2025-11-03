@@ -12,7 +12,7 @@
 @implementation ModuleAwake (DModule)
 
 + (void)DModuleAwake {
-    [Module.routeService addRouteModuleRegister:DModuleImpl.class];
+    [Module.routeService addRegister:DModuleImpl.class];
 }
 
 @end

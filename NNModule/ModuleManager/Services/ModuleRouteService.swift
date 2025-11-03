@@ -12,14 +12,14 @@ import Foundation
 /// Services used to provide routing
 @objc public protocol ModuleRouteService: ModuleFunctionalService, URLRouterType, URLRouterTypeAttach {
     
-    func addRouteModuleRegister(_ register: RegisterRouteModuleService.Type)
+    func addRegister(_ register: RegisterRouteModuleService.Type)
 }
 
 @objc extension URLRouter: ModuleRouteService {
     
     public static var implInstance: ModuleBasicService { URLRouter.default }
     
-    public func addRouteModuleRegister(_ register: RegisterRouteModuleService.Type) {
+    public func addRegister(_ register: RegisterRouteModuleService.Type) {
         guard let routeModule = Module.registerImpl(of: register) as? URLRouteModuleType else { return }
         
         addRouteModule(routeModule)

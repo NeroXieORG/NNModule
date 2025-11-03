@@ -3,10 +3,6 @@
 use_frameworks!
 #inhibit_all_warnings!
 
-# 裁剪列表
-$pods_split_list = []
-
-
 platform :ios, '10.0'
 
 target 'Example_ModuleManager' do

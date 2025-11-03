@@ -19,7 +19,7 @@ extension Module.Awake {
         Module.tabService.addRegister(AModuleImpl.self)
         Module.tabService.addRegister(AModuleImpl.self)
         Module.launchTaskService.addRegister(ModuleLaunchTaskTest.self)
-        Module.routeService.addRouteModuleRegister(AModuleImpl.self)
+        Module.routeService.addRegister(AModuleImpl.self)
     }
 }
 
